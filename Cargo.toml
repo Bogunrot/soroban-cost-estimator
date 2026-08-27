@@ -93,6 +93,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 insta = "1.40.0"
 proptest = "1.11.0"
 criterion = "0.5"
+axum = "0.8"
 
 [profile.release]
 lto = true
