@@ -6,9 +6,9 @@
 
 use std::net::SocketAddr;
 
+use axum::Router;
 use axum::extract::Json;
 use axum::routing::post;
-use axum::Router;
 use serde_json::{Value, json};
 use tokio::net::TcpListener;
 
@@ -36,14 +36,13 @@ fn encode_contract_compute_xdr() -> String {
     use base64::Engine;
     use stellar_xdr::{ConfigSettingEntry, WriteXdr};
 
-    let entry = ConfigSettingEntry::ContractComputeV0(
-        stellar_xdr::ConfigSettingContractComputeV0 {
+    let entry =
+        ConfigSettingEntry::ContractComputeV0(stellar_xdr::ConfigSettingContractComputeV0 {
             ledger_max_instructions: 1_000_000,
             tx_max_instructions: 100_000,
             fee_rate_per_instructions_increment: 10,
             tx_memory_limit: 41_943_040,
-        },
-    );
+        });
     let xdr = entry.to_xdr(stellar_xdr::Limits::none()).unwrap();
     base64::engine::general_purpose::STANDARD.encode(xdr)
 }
@@ -53,8 +52,8 @@ fn encode_contract_ledger_cost_xdr() -> String {
     use base64::Engine;
     use stellar_xdr::{ConfigSettingEntry, WriteXdr};
 
-    let entry = ConfigSettingEntry::ContractLedgerCostV0(
-        stellar_xdr::ConfigSettingContractLedgerCostV0 {
+    let entry =
+        ConfigSettingEntry::ContractLedgerCostV0(stellar_xdr::ConfigSettingContractLedgerCostV0 {
             ledger_max_disk_read_entries: 1_000_000,
             ledger_max_disk_read_bytes: 1_000_000,
             ledger_max_write_ledger_entries: 1_000_000,
@@ -70,8 +69,7 @@ fn encode_contract_ledger_cost_xdr() -> String {
             rent_fee1_kb_soroban_state_size_low: 10,
             rent_fee1_kb_soroban_state_size_high: 20,
             soroban_state_rent_fee_growth_factor: 2000,
-        },
-    );
+        });
     let xdr = entry.to_xdr(stellar_xdr::Limits::none()).unwrap();
     base64::engine::general_purpose::STANDARD.encode(xdr)
 }
@@ -95,12 +93,10 @@ fn encode_contract_events_xdr() -> String {
     use base64::Engine;
     use stellar_xdr::{ConfigSettingEntry, WriteXdr};
 
-    let entry = ConfigSettingEntry::ContractEventsV0(
-        stellar_xdr::ConfigSettingContractEventsV0 {
-            tx_max_contract_events_size_bytes: 1_000_000,
-            fee_contract_events1_kb: 50,
-        },
-    );
+    let entry = ConfigSettingEntry::ContractEventsV0(stellar_xdr::ConfigSettingContractEventsV0 {
+        tx_max_contract_events_size_bytes: 1_000_000,
+        fee_contract_events1_kb: 50,
+    });
     let xdr = entry.to_xdr(stellar_xdr::Limits::none()).unwrap();
     base64::engine::general_purpose::STANDARD.encode(xdr)
 }
@@ -110,13 +106,12 @@ fn encode_contract_bandwidth_xdr() -> String {
     use base64::Engine;
     use stellar_xdr::{ConfigSettingEntry, WriteXdr};
 
-    let entry = ConfigSettingEntry::ContractBandwidthV0(
-        stellar_xdr::ConfigSettingContractBandwidthV0 {
+    let entry =
+        ConfigSettingEntry::ContractBandwidthV0(stellar_xdr::ConfigSettingContractBandwidthV0 {
             ledger_max_txs_size_bytes: 1_000_000,
             tx_max_size_bytes: 100_000,
             fee_tx_size1_kb: 10,
-        },
-    );
+        });
     let xdr = entry.to_xdr(stellar_xdr::Limits::none()).unwrap();
     base64::engine::general_purpose::STANDARD.encode(xdr)
 }
