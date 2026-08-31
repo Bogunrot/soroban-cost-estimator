@@ -96,6 +96,19 @@ pub fn format_resource_warnings(warnings: &[ResourceWarning]) -> String {
     output
 }
 
+/// Compute what percentage `part` is of `total`.
+///
+/// Returns a formatted string like `"29.3%"`. Returns `"0.0%"` when the
+/// total is zero to avoid division by zero.
+pub fn fee_percentage(part: i64, total: i64) -> String {
+    if total == 0 {
+        "0.0%".to_string()
+    } else {
+        let pct = (part as f64 / total as f64) * 100.0;
+        format!("{pct:.1}%")
+    }
+}
+
 /// A complete cost report for a single contract invocation.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct CostReport {
@@ -156,16 +169,35 @@ pub fn format_report_table(report: &CostReport) -> String {
     output.push('\n');
 
     output.push_str(&format!("\nFee Breakdown:\n"));
+    let total = report.fee.total_stroops;
     output.push_str(&format!(
-        "  Non-refundable: {} stroops\n",
-        report.fee.non_refundable_stroops
+        "  Non-refundable: {} stroops ({})\n",
+        report.fee.non_refundable_stroops,
+        fee_percentage(report.fee.non_refundable_stroops, total),
     ));
     output.push_str(&format!(
-        "  Refundable:     {} stroops\n",
-        report.fee.refundable_stroops
+        "  Refundable:     {} stroops ({})\n",
+        report.fee.refundable_stroops,
+        fee_percentage(report.fee.refundable_stroops, total),
+    ));
+    output.push_str(&format!("\n  Components (of non-refundable):\n"));
+    output.push_str(&format!(
+        "    CPU:        {} stroops ({})\n",
+        report.fee.cpu_fee_stroops,
+        fee_percentage(report.fee.cpu_fee_stroops, total),
     ));
     output.push_str(&format!(
-        "  Total:          {} stroops ({})\n",
+        "    Storage:    {} stroops ({})\n",
+        report.fee.storage_fee_stroops,
+        fee_percentage(report.fee.storage_fee_stroops, total),
+    ));
+    output.push_str(&format!(
+        "    Bandwidth:  {} stroops ({})\n",
+        report.fee.bandwidth_fee_stroops,
+        fee_percentage(report.fee.bandwidth_fee_stroops, total),
+    ));
+    output.push_str(&format!(
+        "\n  Total:          {} stroops ({})\n",
         report.fee.total_stroops, report.fee.total_xlm,
     ));
 
@@ -265,5 +297,25 @@ mod tests {
         let output = format_resource_warnings(&warnings);
         assert!(output.contains("CPU instructions"));
         assert!(output.contains("90%"));
+    }
+
+    #[test]
+    fn test_fee_percentage_normal() {
+        assert_eq!(fee_percentage(50, 100), "50.0%");
+        assert_eq!(fee_percentage(1, 3), "33.3%");
+        assert_eq!(fee_percentage(0, 100), "0.0%");
+    }
+
+    #[test]
+    fn test_fee_percentage_zero_total() {
+        assert_eq!(fee_percentage(0, 0), "0.0%");
+        assert_eq!(fee_percentage(100, 0), "0.0%");
+    }
+
+    #[test]
+    fn test_fee_percentage_rounding() {
+        assert_eq!(fee_percentage(1, 10), "10.0%");
+        assert_eq!(fee_percentage(1, 3), "33.3%");
+        assert_eq!(fee_percentage(2, 3), "66.7%");
     }
 }
