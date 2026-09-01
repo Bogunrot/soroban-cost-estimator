@@ -92,7 +92,7 @@ pub fn format_resource_warnings(warnings: &[ResourceWarning]) -> String {
     for w in warnings {
         output.push_str(&format!("{w}\n"));
     }
-    output.push_str("\n");
+    output.push('\n');
     output
 }
 
